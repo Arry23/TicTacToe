@@ -1,0 +1,29 @@
+.board{
+    display: grid;
+    grid-template-columns: 140px 140px 140px;
+    padding: 10px;
+}
+
+.grid-item {
+    border: 3px solid rgba(255, 174, 0, 0.8);
+    height: 100px;
+    padding: 20px;
+    font-size: 30px;
+    text-align: center;
+}
+
+.grid-item:nth-child(-n + 3) {
+    border-top: none;
+} 
+
+.grid-item:nth-child(3n) {
+    border-right: none;
+}
+
+.grid-item:nth-child(3n  - 2) {
+    border-left: none;
+} 
+
+.grid-item:nth-child(n + 7) {
+    border-bottom: none;
+}
