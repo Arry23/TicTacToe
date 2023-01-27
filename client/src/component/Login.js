@@ -13,7 +13,7 @@ export default function Login(props) {
       password: loginp,
     };
 
-    const data = await fetch("http://localhost:9000/users/login", {
+    const data = await fetch(`${process.env.REACT_APP_SERVER_URL}/users/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(x),
