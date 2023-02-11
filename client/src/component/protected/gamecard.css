@@ -1,0 +1,11 @@
+.shadow{
+    box-shadow: 5px 10px 8px 10px #000000;
+    margin-bottom: 10px;
+}
+
+.date{
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    /* font-family: "Times New Roman", Times, serif; */
+}

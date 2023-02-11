@@ -1,33 +1,67 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect, useContext } from 'react'
 import "./game.css"
+import { UserContext } from '../context.js'
+import TikTacToe from './TikTacToe'
 
 export default function Game() {
+  const user = useContext(UserContext)
   const cross = (<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="blue" class="bi bi-x" viewBox="0 0 16 16">
                 <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
               </svg>);
   const zero = (<svg xmlns="http://www.w3.org/2000/svg" width="27" height="28" fill="red" class="bi bi-circle" viewBox="0 0 16 16">
                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
               </svg>);
-  let p1="p1"
-  let p2="p2"
-  let grid = [["","",p2],["","",p2],["",p1,""]]
-
-  const [e1,setE1] = useState(grid[0][0]===p1?cross:(grid[0][0]===p2?zero:""));
-  const [e2,setE2] = useState(grid[0][1]===p1?cross:(grid[0][1]===p2?zero:""));
-  const [e3,setE3] = useState(grid[0][2]===p1?cross:(grid[0][2]===p2?zero:""));
-  const [e4,setE4] = useState(grid[1][0]===p1?cross:(grid[1][0]===p2?zero:""));
-  const [e5,setE5] = useState(grid[1][1]===p1?cross:(grid[1][1]===p2?zero:""));
-  const [e6,setE6] = useState(grid[1][2]===p1?cross:(grid[1][2]===p2?zero:""));
-  const [e7,setE7] = useState(grid[2][0]===p1?cross:(grid[2][0]===p2?zero:""));
-  const [e8,setE8] = useState(grid[2][1]===p1?cross:(grid[2][1]===p2?zero:""));
-  const [e9,setE9] = useState(grid[2][2]===p1?cross:(grid[2][2]===p2?zero:""));
   
+  let p1=user.user;
+  let p2=user.p2;
+  const [grid,setGrid] = useState()
+  const [e1,setE1] = useState();
+  const [e2,setE2] = useState();
+  const [e3,setE3] = useState();
+  const [e4,setE4] = useState();
+  const [e5,setE5] = useState();
+  const [e6,setE6] = useState();
+  const [e7,setE7] = useState();
+  const [e8,setE8] = useState();
+  const [e9,setE9] = useState();
   const [prev,setPrev] = useState(0);
+  const [res,setRes] = useState();
+  const [turn,setTurn] =useState()
+
+  useEffect(() =>{
+    fetch(`${process.env.REACT_APP_SERVER_URL}/users/getgame`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        p1: p1,
+        p2: p2
+      })
+    }).then((res)=>{
+      return res.json()
+    }).then((data)=>{
+      return data.game
+    }).then((data)=>{
+      setGrid(data.game)
+      setRes(data.result)
+      let arr=data.game
+      setE1(arr[0][0]===p1?cross:(arr[0][0]===p2?zero:""));
+      setE2(arr[0][1]===p1?cross:(arr[0][1]===p2?zero:""));
+      setE3(arr[0][2]===p1?cross:(arr[0][2]===p2?zero:""));
+      setE4(arr[1][0]===p1?cross:(arr[1][0]===p2?zero:""));
+      setE5(arr[1][1]===p1?cross:(arr[1][1]===p2?zero:""));
+      setE6(arr[1][2]===p1?cross:(arr[1][2]===p2?zero:""));
+      setE7(arr[2][0]===p1?cross:(arr[2][0]===p2?zero:""));
+      setE8(arr[2][1]===p1?cross:(arr[2][1]===p2?zero:""));
+      setE9(arr[2][2]===p1?cross:(arr[2][2]===p2?zero:""));
+      setTurn(data.turn)
+    })
+    // eslint-disable-next-line
+  },[])  
+  
   const clickhandler = (num) => {
     let i=(num-1-(num-1)%3)/3
     let j=(num-1)%3
-    if(grid[i][j]===p1 || grid[i][j]===p2) return;
+    if(grid[i][j]===p1 || grid[i][j]===p2 || num===prev || turn===p2 || res!=="none") return;
     grid[i][j]=p1
     if(num===1) setE1(cross);
     else if(num===2) setE2(cross);
@@ -41,7 +75,6 @@ export default function Game() {
     i=(prev-1-(prev-1)%3)/3
     j=(prev-1)%3
     grid[i][j]=""
-    console.log(grid);
     if(prev===1) setE1("");
     else if(prev===2) setE2("");
     else if(prev===3) setE3("");
@@ -55,41 +88,60 @@ export default function Game() {
   }
 
   const submithandler = () => {
-
+    if(turn===p2 && res!=="none") return
+    let result="none"
+    if(grid[0][0]!==""){
+      if(grid[0][0]===grid[0][1] && grid[0][1]===grid[0][2]) result=grid[0][0]
+      else if(grid[0][0]===grid[1][0] && grid[1][0]===grid[2][0]) result=grid[0][0]
+      else if(grid[0][0]===grid[1][1] && grid[1][1]===grid[2][2]) result=grid[0][0]
+    }
+    if(grid[0][1]!==""){
+      if(grid[0][1]===grid[1][1] && grid[1][1]===grid[2][1]) result=grid[0][1]
+    }
+    if(grid[0][2]!==""){
+      if(grid[0][2]===grid[1][2] && grid[1][2]===grid[2][2]) result=grid[0][2]
+      else if(grid[0][2]===grid[1][1] && grid[1][1]===grid[2][0]) result=grid[0][2]
+    }
+    if(grid[1][0]!==""){
+      if(grid[1][0]===grid[1][1] && grid[1][1]===grid[1][2]) result=grid[1][0]
+    }
+    if(grid[2][0]!==""){
+      if(grid[2][0]===grid[2][1] && grid[2][1]===grid[2][2]) result=grid[2][0]
+    }
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const date=new Date();
+    let day = date.getDate()+(date.getDate()%10===1?"st":(date.getDate()%10===2?"nd":(date.getDate()%10===3?"rd":"th")))
+    let month = months[date.getMonth()]
+    let year = date.getFullYear()
+    let hour = date.getHours();
+    let min = date.getMinutes();
+    let noon = "am";
+    if(hour >= 12)
+        noon = "pm"
+    hour %= 12;
+    if(hour === 0) 
+        hour = 12;
+    let datestr = day+" "+month+" "+year+", "+hour+":"+min+noon
+    setPrev(0)
+    setTurn(p2)
+    setRes(result)
+    fetch(`${process.env.REACT_APP_SERVER_URL}/users/update`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        p1: p1,
+        p2: p2,
+        turn: p2,
+        result: result,
+        grid: grid,
+        time: datestr
+      }),
+    });
   }
-
+  
   return (
     <div className='mobile-box'>
-      <Link className="nav-link" to="/game">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
-          <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-        </svg>
-      </Link>
-      <h1>Game with harsh</h1>
-      <h6>Your Piece</h6>
-      <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="blue" class="bi bi-x" viewBox="0 0 16 16">
-        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-      </svg>
-      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="red" class="bi bi-circle" viewBox="0 0 16 16">
-        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-      </svg>
-      <div class="alert alert-warning" role="alert">
-        This is a warning alert—check it out!
-      </div>
-      <div className="board">
-        <div class="grid-item" onClick={() => clickhandler(1)}>{e1}</div>
-        <div class="grid-item" onClick={() => clickhandler(2)}>{e2}</div>
-        <div class="grid-item" onClick={() => clickhandler(3)}>{e3}</div>  
-        <div class="grid-item" onClick={() => clickhandler(4)}>{e4}</div>
-        <div class="grid-item" onClick={() => clickhandler(5)}>{e5}</div>
-        <div class="grid-item" onClick={() => clickhandler(6)}>{e6}</div>  
-        <div class="grid-item" onClick={() => clickhandler(7)}>{e7}</div>
-        <div class="grid-item" onClick={() => clickhandler(8)}>{e8}</div>
-        <div class="grid-item" onClick={() => clickhandler(9)}>{e9}</div>
-      </div>
-      <div className="d-grid gap-2">
-        <button className="btn btn-warning" type="button" onClick={submithandler}>Submit</button>
-      </div>
+      <TikTacToe p1={p1} p2={p2} res={res} turn={turn} e1={e1} e2={e2} e3={e3} e4={e4} e5={e5} e6={e6} e7={e7} e8={e8} e9={e9} clickhandler={clickhandler} submithandler={submithandler}/>
     </div>
   )
 }

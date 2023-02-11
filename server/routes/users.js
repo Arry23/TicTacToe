@@ -4,20 +4,46 @@ const router = express.Router();
 const userdb = require("../model/userdb");
 const friends = require("../model/user");
 const games = require("../model/game");
-// const getModel = require("../model/usermsg");
-// const { default: mongoose } = require("mongoose");
 
 router.get('/',async(req,res) =>{
     try{
         const user = await friends.find();
-        // console.log(user);
         res.send(user)
     }catch(err){
         res.send(err);
     }
 });
 
-router.get('/game',async(req,res) =>{
+router.post('/getname',async(req,res) =>{
+    try{
+        const game = await friends.findOne({email:req.body.email});
+        res.send({name: game.name});
+    }catch(err){
+        res.send(err);
+    }
+});
+
+router.post('/getuname',async(req,res) =>{
+    try{
+        const game = await userdb.findOne({userid:req.body.loginu});
+        res.send({name: game.name});
+    }catch(err){
+        res.send(err);
+    }
+});
+
+router.post('/player',async(req,res) =>{
+    try{
+        let game1 = await games.find({player1:req.body.player})
+        let game2 = await games.find({player2:req.body.player})
+        let arr = game1.concat(game2)
+        res.send({game:arr});
+    }catch(err){
+        res.send(err);
+    }
+});
+
+router.post('/getgame',async(req,res) =>{
     try{
         let p1=req.body.p1;
         let p2=req.body.p2;
@@ -27,7 +53,7 @@ router.get('/game',async(req,res) =>{
             p2=temp;
         }
         const game = await games.findOne({player1:p1 , player2:p2});
-        res.send(game);
+        res.send({game});
     }catch(err){
         res.send(err);
     }
@@ -35,8 +61,6 @@ router.get('/game',async(req,res) =>{
 
 router.post('/game',async(req,res) =>{
     try{
-        let p1=req.body.p1;
-        let p2=req.body.p2;
         let arr=new Array(3);
         for(let i=0 ; i<3 ; i++){
             arr[i]=new Array(3);
@@ -46,13 +70,20 @@ router.post('/game',async(req,res) =>{
                 arr[i][j]=""
             }
         }
-        console.log(arr);
+        let p1=req.body.p1;
+        let p2=req.body.p2;
+        if(p1>p2){
+            let temp=p1;
+            p1=p2;
+            p2=temp;
+        }
         const newgame= new games({
             player1:p1,
             player2:p2,
-            turn:p1,
-            result:"",
-            game:arr
+            turn:req.body.turn,
+            result:"none",
+            game:arr,
+            time:req.body.time
         })
         const a1=await newgame.save();
         res.send(a1);
@@ -61,38 +92,23 @@ router.post('/game',async(req,res) =>{
     }
 });
 
-// router.put('/update',async(req,res) =>{
-//     try{
-//         let p1=req.body.p1;
-//         let p2=req.body.p2;
-//         if(p1>p2){
-//             let temp=p1;
-//             p1=p2;
-//             p2=temp;
-//         }
-//         const game = await games.findOne({player1:p1 , player2:p2});
-//         res.send(game);
-//     }catch(err){
-//         res.send(err);
-//     }
-// });
-
-router.post('/message/append',async(req,res) =>{
-    // try{
-    //     const messagedb = mongoose.connection.db.collection(req.body.modelname);
-    //     messagedb.insertOne({
-    //         sender:req.body.sender,
-    //         reciever:req.body.reciever,
-    //         message:req.body.msg,
-    //         time:req.body.time
-    //     }).then(res.send(messagedb));
-    // }catch(err){
-    //     res.send(err);
-    // }
+router.put('/update',async(req,res) =>{
+    try{
+        let p1=req.body.p1;
+        let p2=req.body.p2;
+        if(p1>p2){
+            let temp=p1;
+            p1=p2;
+            p2=temp;
+        }
+        console.log(req.body.result)
+        await games.updateOne({player1:p1 , player2:p2},{turn: req.body.turn , game: req.body.grid, result: req.body.result, time:req.body.time});
+    }catch(err){
+        res.send(err);
+    }
 });
 
 router.post('/login',async(req,res) =>{
-    // console.log(req.body);
     const user = await userdb.findOne({userid:req.body.username});
     if(user === null){
         res.send({status:false});

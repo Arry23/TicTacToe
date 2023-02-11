@@ -24,12 +24,13 @@ export default function Register() {
     });
     const jsondata = await data.json();
     if(jsondata.status){
-      alert("Your account have succefully created!!!");
+      alert("Your account have succefully created!!!,Now you can go on and login!!!");
     }
     else{ 
       alert("This username or email has been already taken, try another one.");
     }
   };
+  
   return (
     <div className='mobile-box'>
       <Link className="nav-link" to="/">

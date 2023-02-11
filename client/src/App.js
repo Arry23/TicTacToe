@@ -12,26 +12,28 @@ import React, { useState } from "react";
 import ProtectedRoutes from './component/ProtectedRoutes';
 import GameMenu from './component/protected/GameMenu';
 import Game from './component/protected/Game';
+import { UserContext } from './component/context.js'
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
-  let a1="nbdfsjvj";
+  const [user,setUser] = useState("")
+  const [p2,setP2] = useState("")
 
   return (
-    <>
-      <Router>
-        <Routes>
-          <Route exact path="/" element={<Start/>}/>
-          <Route exact path="/register" element={<Register/>}/>
-          <Route exact path="/login" element={<Login isAuth={isAuth} setIsAuth={setIsAuth}/>}/>
-          <Route element={<ProtectedRoutes auth={isAuth}/>}>
-            <Route exact path='/home' element={<Home />} />
-            <Route exact path="/home/game" element={<GameMenu/>}/>
-            <Route exact path="/home/game/play" element={<Game/>}/>
-          </Route>
-        </Routes>
-      </Router>
-    </>
+      <UserContext.Provider value={{isAuth,setIsAuth,user,setUser,p2,setP2}}>
+        <Router>
+          <Routes>
+            <Route exact path="/" element={<Start/>}/>
+            <Route exact path="/register" element={<Register/>}/>
+            <Route exact path="/login" element={<Login /*setIsAuth={setIsAuth} setUser={setUser}*//>}/>
+            <Route element={<ProtectedRoutes /*auth={isAuth}*//>}>
+              <Route exact path='/home' element={<Home /*user={user} setP2={setP2}*//>} />
+              <Route exact path="/home/game" element={<GameMenu /*user={user} setP2={setP2}*//>}/>
+              <Route exact path="/home/play" element={<Game key="something_unique" /*p1={user} p2={p2}*//>}/>
+            </Route>
+          </Routes>
+        </Router>
+      </UserContext.Provider>
   );
 }
 

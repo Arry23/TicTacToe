@@ -1,15 +1,67 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import "./gamemenu.css"
+import { UserContext } from '../context.js'
 
 export default function GameMenu() {
-    const [auth,setAuth] = useState(true);
-
+    
+    const user = useContext(UserContext)
+    const [email,setEmail] = useState("");
     const navigate = useNavigate();
 
-    const clickhandler = () => {
-        if(auth){
-            navigate("play");
+    const clickhandler = async () => {
+        let name = await fetch(`${process.env.REACT_APP_SERVER_URL}/users/getname`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: email
+            }),
+        });
+        name=await name.json();
+        if(name.name === undefined){
+            alert("Enter valid email!!!");
+        }
+        else{
+            user.setP2(name.name)
+            let game = await fetch(`${process.env.REACT_APP_SERVER_URL}/users/getgame`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  p1: user.user,
+                  p2: name.name
+                })
+            });
+            game = await game.json().game
+            if(game !== undefined){
+                alert("Your ganme is already running with "+name.name);
+            }
+            else{
+                const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                const date=new Date();
+                let day = date.getDate()+(date.getDate()%10===1?"st":(date.getDate()%10===2?"nd":(date.getDate()%10===3?"rd":"th")))
+                let month = months[date.getMonth()]
+                let year = date.getFullYear()
+                let hour = date.getHours();
+                let min = date.getMinutes();
+                let noon = "am";
+                if(hour >= 12)
+                    noon = "pm"
+                hour %= 12;
+                if(hour === 0) 
+                    hour = 12;
+                let datestr = day+" "+month+" "+year+", "+hour+":"+min+noon
+                await fetch(`${process.env.REACT_APP_SERVER_URL}/users/game`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      p1: user.user,
+                      p2: name.name,
+                      turn: user.user,
+                      time:datestr
+                    })
+                });
+                navigate("/home/play");
+            }
         }
     };
 
@@ -26,7 +78,7 @@ export default function GameMenu() {
                 <form>
                 <div className="mb-3">
                     <label for="exampleInputEmail1" className="form-label">Email</label>
-                    <input type="text" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder='Type their email here'/>
+                    <input type="text" className="form-control" id="exampleInputEmail1" onChange={(e) => setEmail(e.target.value)} aria-describedby="emailHelp" placeholder='Type their email here'/>
                 </div>
                 </form>
                 <div className="d-grid gap-2">

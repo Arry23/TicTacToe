@@ -21,7 +21,7 @@ app.use(express.json());
 const userroute = require("./routes/users");
 app.use('/users',userroute);
 
-const port = process.env.PORT
+const port = process.env.PORT 
 
 app.listen(port,() =>{
     console.log("Server started!!!");

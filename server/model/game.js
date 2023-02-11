@@ -19,7 +19,11 @@ const userschema = new mongoose.Schema({
         required: true
     },
     game: {
-        type: Array,
+        type: [[String]],
+        required: true
+    },
+    time: {
+        type: String,
         required: true
     }
 

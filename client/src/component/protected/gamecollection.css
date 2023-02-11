@@ -1,0 +1,15 @@
+.modal1{
+    position: absolute;
+    width: 430px;
+    z-index: 1;
+}
+
+.modal2{
+    display: flex;
+    top: 0px;
+    height: 650px;
+    width: 420px;
+    align-items: flex-end;
+    justify-content: flex-end;
+    position: sticky;
+}
